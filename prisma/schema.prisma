@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  no        Int?
+  kategori  String?
+  nama      String
+  harga     Float    // Menggunakan Float agar fleksibel, nanti bisa diformat jadi Rupiah di frontend
+  satuan    String?
+  lokasi    String   // "Keterangan Tempat"
+  detail    String?  // "keterangan lanjutan..."
+  stok      Int      @default(0) // Kolom tambahan buat manajemen stok nanti
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
