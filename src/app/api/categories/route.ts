@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
     // Ambil semua kategori unik
     const categories = await prisma.product.groupBy({
