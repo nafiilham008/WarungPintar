@@ -21,3 +21,17 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // Akan di-hash
+  createdAt DateTime @default(now())
+}
+
+model ScanLog {
+  id        Int      @id @default(autoincrement())
+  query     String   // Nama barang yang teridentifikasi
+  success   Boolean  @default(true)
+  timestamp DateTime @default(now())
+}

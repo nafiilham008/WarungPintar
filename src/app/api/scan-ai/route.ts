@@ -147,6 +147,19 @@ export async function POST(request: Request) {
             })
         }
 
+        // 5. Log Scan ke DB (Untuk Statistik Admin)
+        try {
+            await prisma.scanLog.create({
+                data: {
+                    query: searchTerm,
+                    success: true
+                }
+            })
+        } catch (logErr) {
+            console.error("Failed to log scan:", logErr)
+            // Jangan gagalkan request utama cuma gara-gara log
+        }
+
         return NextResponse.json({
             identifiedName: searchTerm,
             alternatives: alternatives,
