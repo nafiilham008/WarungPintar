@@ -621,7 +621,7 @@ export default function HomePage() {
                 </SheetHeader>
               </div>
 
-              <ScrollArea className="flex-1 px-6">
+              <div className="flex-1 overflow-y-auto px-6">
                 <div className="space-y-4 py-6">
                   {cart.map((item) => (
                     <div key={item.id} className="flex justify-between items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -702,7 +702,7 @@ export default function HomePage() {
                     )}
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
 
               <div className="p-6 border-t border-slate-100 bg-white sticky bottom-0 z-10 space-y-3">
                 {!isTransactionDone ? (
