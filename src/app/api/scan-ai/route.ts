@@ -135,13 +135,13 @@ export async function POST(request: Request) {
         let altProducts: any[] = []
         if (mainProducts.length < 3 && alternatives.length > 0) {
             const altConditions = alternatives.map((alt: string) => ({
-                nama: { contains: alt, mode: 'insensitive' }
+                nama: { contains: alt, mode: 'insensitive' as const }
             }))
 
             altProducts = await prisma.product.findMany({
                 where: {
                     OR: altConditions,
-                    NOT: { nama: { contains: searchTerm, mode: 'insensitive' } } // Jangan duplikat
+                    NOT: { nama: { contains: searchTerm, mode: 'insensitive' as const } } // Jangan duplikat
                 },
                 take: 3
             })
