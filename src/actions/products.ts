@@ -1,8 +1,40 @@
-'use client' // Note: This file should be 'use server' if strictly server actions, but usually imported in client. Let's make it 'use server'.
 'use server'
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+
+export async function addProductAction(prevState: any, formData: FormData) {
+    const nama = formData.get('nama') as string
+    const harga = parseFloat(formData.get('harga') as string)
+    const satuan = formData.get('satuan') as string
+    const kategori = formData.get('kategori') as string
+    const lokasi = formData.get('lokasi') as string
+
+    if (!nama || isNaN(harga)) {
+        return { error: 'Nama dan harga wajib diisi' }
+    }
+
+    try {
+        await prisma.product.create({
+            data: {
+                nama,
+                harga,
+                satuan,
+                kategori,
+                lokasi,
+                stok: 0, // Default stok 0 untuk barang baru
+            }
+        })
+    } catch (error) {
+        console.error('Create error:', error)
+        return { error: 'Gagal menambahkan barang' }
+    }
+
+    revalidatePath('/')
+    revalidatePath('/dashboard/products')
+    redirect('/dashboard/products')
+}
 
 export async function deleteProduct(id: string) {
     try {
@@ -28,6 +60,7 @@ export async function updateProduct(id: string, data: any) {
                 stok: parseInt(data.stok),
                 kategori: data.kategori,
                 satuan: data.satuan,
+                lokasi: data.lokasi,
                 gambar: data.gambar
             }
         })
