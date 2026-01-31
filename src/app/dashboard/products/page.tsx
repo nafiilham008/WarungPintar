@@ -38,12 +38,23 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
     const [deletingId, setDeletingId] = useState<string | number | null>(null)
+    const [productToDelete, setProductToDelete] = useState<{ id: string | number, name: string } | null>(null)
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1)
@@ -111,9 +122,10 @@ export default function ProductsPage() {
         setCurrentPage(1)
     }, [search, filters])
 
-    const handleDelete = async (id: string | number, name: string) => {
-        if (!confirm(`Hapus "${name}"?`)) return
+    const handleDelete = async () => {
+        if (!productToDelete) return
 
+        const { id } = productToDelete
         setDeletingId(id)
         const res = await deleteProduct(id)
         if (res.success) {
@@ -123,6 +135,7 @@ export default function ProductsPage() {
             toast.error(res.error || "Gagal menghapus")
         }
         setDeletingId(null)
+        setProductToDelete(null)
     }
 
     const clearFilters = () => {
@@ -355,7 +368,7 @@ export default function ProductsPage() {
                                                     size="icon"
                                                     className="text-slate-500 hover:text-red-600"
                                                     disabled={deletingId === product.id}
-                                                    onClick={() => handleDelete(product.id, product.nama)}
+                                                    onClick={() => setProductToDelete({ id: product.id, name: product.nama })}
                                                 >
                                                     {deletingId === product.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                                                 </Button>
@@ -412,6 +425,26 @@ export default function ProductsPage() {
                     </div>
                 )}
             </div>
+
+            <AlertDialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Hapus Barang?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Apakah Anda yakin ingin menghapus <strong>&quot;{productToDelete?.name}&quot;</strong>? Tindakan ini tidak dapat dibatalkan.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Hapus
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
