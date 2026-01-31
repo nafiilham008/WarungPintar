@@ -270,118 +270,120 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="rounded-md border border-slate-100 overflow-hidden">
-                    <Table>
-                        <TableHeader className="bg-slate-50">
-                            <TableRow>
-                                <TableHead
-                                    className="w-[300px] cursor-pointer hover:text-emerald-600 transition-colors"
-                                    onClick={() => handleSort('nama')}
-                                >
-                                    <div className="flex items-center">
-                                        Barang
-                                        <SortIcon column="nama" />
-                                    </div>
-                                </TableHead>
-                                <TableHead
-                                    className="cursor-pointer hover:text-emerald-600 transition-colors"
-                                    onClick={() => handleSort('kategori')}
-                                >
-                                    <div className="flex items-center">
-                                        Kategori
-                                        <SortIcon column="kategori" />
-                                    </div>
-                                </TableHead>
-                                <TableHead
-                                    className="cursor-pointer hover:text-emerald-600 transition-colors"
-                                    onClick={() => handleSort('harga')}
-                                >
-                                    <div className="flex items-center">
-                                        Harga
-                                        <SortIcon column="harga" />
-                                    </div>
-                                </TableHead>
-                                <TableHead
-                                    className="cursor-pointer hover:text-emerald-600 transition-colors"
-                                    onClick={() => handleSort('stok')}
-                                >
-                                    <div className="flex items-center">
-                                        Stok
-                                        <SortIcon column="stok" />
-                                    </div>
-                                </TableHead>
-                                <TableHead className="text-right">Aksi</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loading ? (
+                    <div className="overflow-x-auto">
+                        <Table className="min-w-[800px]">
+                            <TableHeader className="bg-slate-50">
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-48 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-slate-400">
-                                            <Loader2 className="w-8 h-8 animate-spin" />
-                                            <span>Memuat data...</span>
+                                    <TableHead
+                                        className="w-[300px] cursor-pointer hover:text-emerald-600 transition-colors"
+                                        onClick={() => handleSort('nama')}
+                                    >
+                                        <div className="flex items-center">
+                                            Barang
+                                            <SortIcon column="nama" />
                                         </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : products.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-48 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-slate-400">
-                                            <PackageSearch className="w-12 h-12 opacity-20" />
-                                            <span>Barang tidak ditemukan.</span>
+                                    </TableHead>
+                                    <TableHead
+                                        className="cursor-pointer hover:text-emerald-600 transition-colors"
+                                        onClick={() => handleSort('kategori')}
+                                    >
+                                        <div className="flex items-center">
+                                            Kategori
+                                            <SortIcon column="kategori" />
                                         </div>
-                                    </TableCell>
+                                    </TableHead>
+                                    <TableHead
+                                        className="cursor-pointer hover:text-emerald-600 transition-colors"
+                                        onClick={() => handleSort('harga')}
+                                    >
+                                        <div className="flex items-center">
+                                            Harga
+                                            <SortIcon column="harga" />
+                                        </div>
+                                    </TableHead>
+                                    <TableHead
+                                        className="cursor-pointer hover:text-emerald-600 transition-colors"
+                                        onClick={() => handleSort('stok')}
+                                    >
+                                        <div className="flex items-center">
+                                            Stok
+                                            <SortIcon column="stok" />
+                                        </div>
+                                    </TableHead>
+                                    <TableHead className="text-right">Aksi</TableHead>
                                 </TableRow>
-                            ) : (
-                                products.map((product) => (
-                                    <TableRow key={product.id} className="hover:bg-slate-50/50 transition-colors">
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
-                                                    <PackageSearch className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <div className="font-bold text-slate-700">{product.nama}</div>
-                                                    <div className="text-[10px] text-slate-400 uppercase tracking-wider">{product.satuan || 'Pcs'}</div>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
-                                                {product.kategori || 'Tanpa Kategori'}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="font-medium text-slate-700">
-                                            {formatRupiah(product.harga)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <span className={`w-2 h-2 rounded-full ${product.stok > 10 ? 'bg-emerald-500' : product.stok > 0 ? 'bg-amber-500' : 'bg-red-500'}`} />
-                                                <span className="font-bold text-slate-700">{product.stok}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button variant="ghost" size="icon" asChild className="text-slate-500 hover:text-emerald-600">
-                                                    <Link href={`/dashboard/products/${product.id}`}>
-                                                        <Edit className="w-4 h-4" />
-                                                    </Link>
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-slate-500 hover:text-red-600"
-                                                    disabled={deletingId === product.id}
-                                                    onClick={() => setProductToDelete({ id: product.id, name: product.nama })}
-                                                >
-                                                    {deletingId === product.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                                </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-48 text-center">
+                                            <div className="flex flex-col items-center gap-2 text-slate-400">
+                                                <Loader2 className="w-8 h-8 animate-spin" />
+                                                <span>Memuat data...</span>
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                                ) : products.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-48 text-center">
+                                            <div className="flex flex-col items-center gap-2 text-slate-400">
+                                                <PackageSearch className="w-12 h-12 opacity-20" />
+                                                <span>Barang tidak ditemukan.</span>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    products.map((product) => (
+                                        <TableRow key={product.id} className="hover:bg-slate-50/50 transition-colors">
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
+                                                        <PackageSearch className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-slate-700">{product.nama}</div>
+                                                        <div className="text-[10px] text-slate-400 uppercase tracking-wider">{product.satuan || 'Pcs'}</div>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
+                                                    {product.kategori || 'Tanpa Kategori'}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="font-medium text-slate-700">
+                                                {formatRupiah(product.harga)}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`w-2 h-2 rounded-full ${product.stok > 10 ? 'bg-emerald-500' : product.stok > 0 ? 'bg-amber-500' : 'bg-red-500'}`} />
+                                                    <span className="font-bold text-slate-700">{product.stok}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button variant="ghost" size="icon" asChild className="text-slate-500 hover:text-emerald-600">
+                                                        <Link href={`/dashboard/products/${product.id}`}>
+                                                            <Edit className="w-4 h-4" />
+                                                        </Link>
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-slate-500 hover:text-red-600"
+                                                        disabled={deletingId === product.id}
+                                                        onClick={() => setProductToDelete({ id: product.id, name: product.nama })}
+                                                    >
+                                                        {deletingId === product.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
 
                 {/* Pagination Control */}
