@@ -388,8 +388,8 @@ export default function ProductsPage() {
 
                 {/* Pagination Control */}
                 {!loading && totalItems > 0 && (
-                    <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-4">
-                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                    <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 text-center sm:text-left">
                             <span>
                                 Menampilkan <span className="font-medium text-slate-700">{products.length}</span> dari <span className="font-medium text-slate-700">{totalItems}</span> barang.
                             </span>
@@ -415,7 +415,7 @@ export default function ProductsPage() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center sm:justify-end gap-2 w-full">
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -426,13 +426,13 @@ export default function ProductsPage() {
                                 Sebelumnya
                             </Button>
 
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1 overflow-x-auto max-w-[200px] sm:max-w-none">
                                 {[...Array(totalPages)].map((_, i) => (
                                     <Button
                                         key={i + 1}
                                         variant={currentPage === i + 1 ? "secondary" : "ghost"}
                                         size="icon"
-                                        className="w-8 h-8 text-sm"
+                                        className="w-8 h-8 text-sm shrink-0"
                                         onClick={() => setCurrentPage(i + 1)}
                                     >
                                         {i + 1}
