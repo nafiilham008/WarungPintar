@@ -1,10 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-// DO NOT instantiate globally if we want dynamic keys
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
     let textInput = "";

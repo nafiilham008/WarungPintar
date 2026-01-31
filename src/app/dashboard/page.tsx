@@ -1,8 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PrismaClient } from '@prisma/client'
-import { Package, Smartphone } from 'lucide-react'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 export default async function DashboardPage() {
     const productCount = await prisma.product.count()
