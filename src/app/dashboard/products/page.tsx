@@ -269,7 +269,7 @@ export default function ProductsPage() {
                     />
                 </div>
 
-                <div className="rounded-md border border-slate-100 overflow-hidden">
+                <div className="rounded-md border border-slate-100 overflow-hidden max-w-[calc(100vw-2rem)] md:max-w-full">
                     <div className="overflow-x-auto">
                         <Table className="min-w-[800px]">
                             <TableHeader className="bg-slate-50">

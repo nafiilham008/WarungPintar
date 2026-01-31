@@ -18,7 +18,7 @@ export default async function DashboardLayout({
             <DashboardSidebar />
 
             {/* Content Area */}
-            <main className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 bg-slate-50">
+            <main className="flex-1 w-full overflow-x-hidden md:ml-64 p-4 md:p-8 pt-20 md:pt-8 bg-slate-50">
                 {children}
             </main>
         </div>
