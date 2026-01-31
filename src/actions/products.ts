@@ -31,8 +31,8 @@ export async function addProductAction(prevState: any, formData: FormData) {
         return { error: 'Gagal menambahkan barang' }
     }
 
-    revalidatePath('/')
-    revalidatePath('/dashboard/products')
+    revalidatePath('/', 'layout')
+    revalidatePath('/dashboard/products', 'page')
     redirect('/dashboard/products')
 }
 
@@ -41,8 +41,8 @@ export async function deleteProduct(id: string) {
         await prisma.product.delete({
             where: { id }
         })
-        revalidatePath('/dashboard/products')
-        revalidatePath('/')
+        revalidatePath('/dashboard/products', 'page')
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error) {
         console.error('Delete error:', error)
@@ -64,8 +64,8 @@ export async function updateProduct(id: string, data: any) {
                 gambar: data.gambar
             }
         })
-        revalidatePath('/dashboard/products')
-        revalidatePath('/')
+        revalidatePath('/dashboard/products', 'page')
+        revalidatePath('/', 'layout')
         return { success: true }
     } catch (error) {
         console.error('Update error:', error)
