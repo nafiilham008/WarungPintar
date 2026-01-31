@@ -1,68 +1,108 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
-    const q = searchParams.get('q')
 
-    if (!q) {
-        const allProducts = await prisma.product.findMany({
-            orderBy: { createdAt: 'desc' },
-            take: 100
-        })
-        return NextResponse.json(allProducts)
+    // Pagination params
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const skip = (page - 1) * limit
+
+    // Filter params
+    const q = searchParams.get('q')
+    const category = searchParams.get('category')
+    const minPrice = searchParams.get('minPrice')
+    const maxPrice = searchParams.get('maxPrice')
+    const minStock = searchParams.get('minStock')
+    const maxStock = searchParams.get('maxStock')
+
+    // Base query conditions
+    let where: Prisma.ProductWhereInput = {}
+
+    if (category && category !== 'Semua') {
+        where.kategori = category
     }
 
-    // 1. Search Utama (Prioritas 1: Exact/Phrase Match)
-    let products = await prisma.product.findMany({
-        where: {
-            OR: [
-                { nama: { contains: q, mode: 'insensitive' as const } },
-                { kategori: { contains: q, mode: 'insensitive' as const } }
-            ]
-        },
-        take: 20
-    })
-
-    // 2. Fallback Loose Search (Jika hasil kosong)
-    // Misal user ketik "Aquviva air mineral enak banget", tapi di DB cuma "Aquviva"
-    if (products.length === 0) {
-        // Pecah kalimat jadi kata-kata, buang kata pendek
-        const keywords = q.split(' ').filter(word => word.length > 2)
-
-        if (keywords.length > 0) {
-            console.log("Strict search failed for:", q, ". Trying loose search with:", keywords)
-
-            products = await prisma.product.findMany({
-                where: {
-                    OR: keywords.flatMap(k => [
-                        { nama: { contains: k, mode: 'insensitive' as const } },
-                        { kategori: { contains: k, mode: 'insensitive' as const } }
-                    ])
-                },
-                take: 20
-            })
-
-            // 3. Extreme Fallback: Substring/Typo Tolerance (Jika masih kosong)
-            // Misal: "freshcare" (DB: "Fresh Care"). Kita cari "fres" nya saja.
-            if (products.length === 0) {
-                const subKeywords = keywords.filter(k => k.length >= 4).map(k => k.substring(0, 4))
-
-                if (subKeywords.length > 0) {
-                    console.log("Loose search failed. Trying substring match:", subKeywords)
-                    products = await prisma.product.findMany({
-                        where: {
-                            OR: subKeywords.flatMap(k => [
-                                { nama: { contains: k, mode: 'insensitive' as const } },
-                                { kategori: { contains: k, mode: 'insensitive' as const } }
-                            ])
-                        },
-                        take: 20
-                    })
-                }
-            }
+    if (minPrice || maxPrice) {
+        where.harga = {
+            ...(minPrice ? { gte: parseFloat(minPrice) } : {}),
+            ...(maxPrice ? { lte: parseFloat(maxPrice) } : {}),
         }
     }
 
-    return NextResponse.json(products)
+    if (minStock || maxStock) {
+        where.stok = {
+            ...(minStock ? { gte: parseInt(minStock) } : {}),
+            ...(maxStock ? { lte: parseInt(maxStock) } : {}),
+        }
+    }
+
+    // Search logic
+    if (q) {
+        where.OR = [
+            { nama: { contains: q, mode: 'insensitive' } },
+            { kategori: { contains: q, mode: 'insensitive' } },
+            { lokasi: { contains: q, mode: 'insensitive' } }
+        ]
+    }
+
+    try {
+        // Fetch data and count in parallel
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+            }),
+            prisma.product.count({ where })
+        ])
+
+        // Smart fallback logic only if no filters are active besides search
+        if (products.length === 0 && q && !category && !minPrice && !maxPrice && !minStock && !maxStock) {
+            const keywords = q.split(' ').filter(word => word.length > 2)
+            if (keywords.length > 0) {
+                const looseWhere: Prisma.ProductWhereInput = {
+                    OR: keywords.flatMap(k => [
+                        { nama: { contains: k, mode: 'insensitive' } },
+                        { kategori: { contains: k, mode: 'insensitive' } }
+                    ])
+                }
+                const [looseProducts, looseTotal] = await Promise.all([
+                    prisma.product.findMany({
+                        where: looseWhere,
+                        orderBy: { createdAt: 'desc' },
+                        skip,
+                        take: limit,
+                    }),
+                    prisma.product.count({ where: looseWhere })
+                ])
+
+                return NextResponse.json({
+                    products: looseProducts,
+                    pagination: {
+                        total: looseTotal,
+                        page,
+                        limit,
+                        totalPages: Math.ceil(looseTotal / limit)
+                    }
+                })
+            }
+        }
+
+        return NextResponse.json({
+            products,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        })
+    } catch (error) {
+        console.error("API Error:", error)
+        return NextResponse.json({ error: "Gagal mengambil data" }, { status: 500 })
+    }
 }

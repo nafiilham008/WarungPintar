@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -11,49 +11,120 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Search, Edit, Trash2, Loader2, PackageSearch } from 'lucide-react'
+import {
+    Search,
+    Edit,
+    Trash2,
+    Loader2,
+    PackageSearch,
+    ChevronLeft,
+    ChevronRight,
+    Filter,
+    X
+} from 'lucide-react'
 import { deleteProduct } from '@/actions/products'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { formatRupiah } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { getCategoriesAction } from '@/actions/categories'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState('')
-    const [deletingId, setDeletingId] = useState<string | null>(null)
+    const [deletingId, setDeletingId] = useState<string | number | null>(null)
 
-    const fetchProducts = async () => {
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [totalItems, setTotalItems] = useState(0)
+    const limit = 10
+
+    // Filter State
+    const [showFilters, setShowFilters] = useState(false)
+    const [categories, setCategories] = useState<string[]>([])
+    const [filters, setFilters] = useState({
+        category: 'Semua',
+        minPrice: '',
+        maxPrice: '',
+        minStock: '',
+        maxStock: ''
+    })
+
+    const fetchProducts = useCallback(async () => {
         setLoading(true)
         try {
-            const res = await fetch(`/api/products?q=${encodeURIComponent(search)}`)
+            const params = new URLSearchParams({
+                q: search,
+                page: currentPage.toString(),
+                limit: limit.toString(),
+                category: filters.category,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                minStock: filters.minStock,
+                maxStock: filters.maxStock
+            })
+
+            const res = await fetch(`/api/products?${params.toString()}`)
             const data = await res.json()
-            setProducts(data)
+
+            if (data.products) {
+                setProducts(data.products)
+                setTotalPages(data.pagination.totalPages)
+                setTotalItems(data.pagination.total)
+            }
         } catch (error) {
             toast.error("Gagal memuat barang")
         } finally {
             setLoading(false)
         }
-    }
+    }, [search, currentPage, filters])
+
+    useEffect(() => {
+        getCategoriesAction().then(setCategories)
+    }, [])
 
     useEffect(() => {
         const timer = setTimeout(fetchProducts, 400)
         return () => clearTimeout(timer)
-    }, [search])
+    }, [fetchProducts])
 
-    const handleDelete = async (id: string, name: string) => {
+    // Reset to page 1 when search or filter changes
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [search, filters])
+
+    const handleDelete = async (id: string | number, name: string) => {
         if (!confirm(`Hapus "${name}"?`)) return
 
         setDeletingId(id)
         const res = await deleteProduct(id)
         if (res.success) {
             toast.success("Barang dihapus")
-            setProducts(products.filter(p => p.id !== id))
+            fetchProducts() // Refresh to sync with pagination
         } else {
             toast.error(res.error || "Gagal menghapus")
         }
         setDeletingId(null)
+    }
+
+    const clearFilters = () => {
+        setFilters({
+            category: 'Semua',
+            minPrice: '',
+            maxPrice: '',
+            minStock: '',
+            maxStock: ''
+        })
+        setSearch('')
     }
 
     return (
@@ -63,17 +134,97 @@ export default function ProductsPage() {
                     <h1 className="text-2xl font-bold text-slate-800">Daftar Barang</h1>
                     <p className="text-slate-500">Kelola stok dan harga warung Anda.</p>
                 </div>
-                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
-                    <Link href="/dashboard/products/add">Tambah Barang</Link>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowFilters(!showFilters)}
+                        className={cn(showFilters && "bg-slate-100")}
+                    >
+                        <Filter className="w-4 h-4 mr-2" />
+                        Filter
+                    </Button>
+                    <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                        <Link href="/dashboard/products/add">Tambah Barang</Link>
+                    </Button>
+                </div>
             </div>
+
+            {showFilters && (
+                <Card className="p-4 border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="space-y-2">
+                            <Label>Kategori</Label>
+                            <Select
+                                value={filters.category}
+                                onValueChange={(v) => setFilters(f => ({ ...f, category: v }))}
+                            >
+                                <SelectTrigger className="bg-slate-50">
+                                    <SelectValue placeholder="Semua Kategori" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Semua">Semua Kategori</SelectItem>
+                                    {categories.map(cat => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Harga (Min - Max)</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="number"
+                                    placeholder="Min"
+                                    className="bg-slate-50"
+                                    value={filters.minPrice}
+                                    onChange={(e) => setFilters(f => ({ ...f, minPrice: e.target.value }))}
+                                />
+                                <span>-</span>
+                                <Input
+                                    type="number"
+                                    placeholder="Max"
+                                    className="bg-slate-50"
+                                    value={filters.maxPrice}
+                                    onChange={(e) => setFilters(f => ({ ...f, maxPrice: e.target.value }))}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Stok (Min - Max)</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="number"
+                                    placeholder="Min"
+                                    className="bg-slate-50"
+                                    value={filters.minStock}
+                                    onChange={(e) => setFilters(f => ({ ...f, minStock: e.target.value }))}
+                                />
+                                <span>-</span>
+                                <Input
+                                    type="number"
+                                    placeholder="Max"
+                                    className="bg-slate-50"
+                                    value={filters.maxStock}
+                                    onChange={(e) => setFilters(f => ({ ...f, maxStock: e.target.value }))}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex items-end">
+                            <Button variant="ghost" className="text-slate-500 w-full" onClick={clearFilters}>
+                                <X className="w-4 h-4 mr-2" />
+                                Reset Filter
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
+            )}
 
             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div className="relative mb-6">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input
                         placeholder="Cari nama barang..."
-                        className="pl-10"
+                        className="pl-10 h-10"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
@@ -114,22 +265,18 @@ export default function ProductsPage() {
                                     <TableRow key={product.id} className="hover:bg-slate-50/50 transition-colors">
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                {product.gambar ? (
-                                                    <img src={product.gambar} className="w-10 h-10 rounded-lg object-cover" />
-                                                ) : (
-                                                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
-                                                        <PackageSearch className="w-5 h-5" />
-                                                    </div>
-                                                )}
+                                                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
+                                                    <PackageSearch className="w-5 h-5" />
+                                                </div>
                                                 <div>
                                                     <div className="font-bold text-slate-700">{product.nama}</div>
-                                                    <div className="text-[10px] text-slate-400 uppercase tracking-wider">{product.satuan}</div>
+                                                    <div className="text-[10px] text-slate-400 uppercase tracking-wider">{product.satuan || 'Pcs'}</div>
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="bg-slate-50 text-slate-600 border-slate-200">
-                                                {product.kategori}
+                                                {product.kategori || 'Tanpa Kategori'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="font-medium text-slate-700">
@@ -165,7 +312,63 @@ export default function ProductsPage() {
                         </TableBody>
                     </Table>
                 </div>
+
+                {/* Pagination Control */}
+                {!loading && totalItems > 0 && (
+                    <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-4">
+                        <div className="text-sm text-slate-500">
+                            Menampilkan <span className="font-medium text-slate-700">{products.length}</span> dari <span className="font-medium text-slate-700">{totalItems}</span> barang.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-1" />
+                                Sebemulnya
+                            </Button>
+
+                            <div className="flex items-center gap-1">
+                                {[...Array(totalPages)].map((_, i) => (
+                                    <Button
+                                        key={i + 1}
+                                        variant={currentPage === i + 1 ? "secondary" : "ghost"}
+                                        size="icon"
+                                        className="w-8 h-8 text-sm"
+                                        onClick={() => setCurrentPage(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </Button>
+                                )).slice(Math.max(0, currentPage - 3), Math.min(totalPages, currentPage + 2))}
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            >
+                                Selanjutnya
+                                <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )
+}
+
+function cn(...inputs: any[]) {
+    return inputs.filter(Boolean).join(' ')
+}
+
+function Card({ children, className }: { children: React.ReactNode, className?: string }) {
+    return <div className={`bg-white rounded-xl border border-slate-200 overflow-hidden ${className}`}>{children}</div>
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+    return <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">{children}</label>
 }
