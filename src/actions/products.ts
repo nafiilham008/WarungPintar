@@ -56,12 +56,12 @@ export async function updateProduct(id: string | number, data: any) {
             where: { id: Number(id) },
             data: {
                 nama: String(data.nama),
-                harga: parseFloat(String(data.harga)),
-                stok: parseInt(String(data.stok)),
+                harga: Number(data.harga),
+                stok: Number(data.stok),
                 kategori: data.kategori ? String(data.kategori) : null,
                 satuan: data.satuan ? String(data.satuan) : null,
                 lokasi: String(data.lokasi),
-                gambar: data.gambar ? String(data.gambar) : null
+                gambar: data.gambar ? String(data.gambar) : null,
             }
         })
         revalidatePath('/')
