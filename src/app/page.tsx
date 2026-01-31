@@ -14,6 +14,7 @@ import { ProductCard, Product } from "@/components/features/ProductCard"
 import { CartSheet, CartItem } from "@/components/features/CartSheet"
 import { CameraScanner } from "@/components/features/CameraScanner"
 import { ProductSkeleton } from "@/components/features/ProductSkeleton"
+import { VoiceMicrophone } from "@/components/features/VoiceMicrophone"
 import { formatRupiah } from "@/lib/utils"
 
 interface Category {
@@ -132,6 +133,56 @@ export default function HomePage() {
   const handleHome = () => {
     setQuery('')
     setResults([])
+  }
+
+  const handleVoiceCommand = async (cmd: any) => {
+    console.log("Voice Command:", cmd)
+
+    // DEBUG: Show what the AI decided
+    // if (cmd.action) {
+    //   toast.info(`Action: ${cmd.action}`, { description: JSON.stringify(cmd.params) })
+    // } else {
+    //   toast.error("AI tidak mengerti maksudnya.")
+    // }
+
+    if (cmd.action === 'search') {
+      setQuery(cmd.params.query)
+      setDebouncedQuery(cmd.params.query) // Force immediate search
+    }
+    else if (cmd.action === 'add_to_cart') {
+      // 1. Coba cari barangnya dulu
+      const productName = cmd.params.product
+      const qty = cmd.params.quantity || 1
+
+      toast.info(`Mencari "${productName}"...`)
+
+      try {
+        const res = await fetch(`/api/products?q=${encodeURIComponent(productName)}`)
+        const data = await res.json()
+
+        if (data && data.length > 0) {
+          // Ambil hasil pertama yang paling relevan
+          const product = data[0]
+
+          // Tambahkan ke keranjang
+          setCart(prev => {
+            const exist = prev.find(p => p.id === product.id)
+            if (exist) {
+              return prev.map(p => p.id === product.id ? { ...p, qty: p.qty + qty } : p)
+            }
+            return [...prev, { ...product, qty: qty }]
+          })
+
+          setIsCartOpen(true)
+          toast.success(`Berhasil menambahkan ${qty} ${product.nama}`)
+        } else {
+          toast.warning(`Maaf, stok "${productName}" tidak ditemukan.`)
+        }
+      } catch (err) {
+        console.error(err)
+        toast.error("Gagal memproses pesanan suara.")
+      }
+    }
   }
 
   const formatRupiah = (num: number) => {
@@ -348,6 +399,7 @@ export default function HomePage() {
         />
       )}
 
+      <VoiceMicrophone onCommand={handleVoiceCommand} />
     </main >
   )
 }

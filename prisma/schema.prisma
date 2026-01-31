@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-
 }
 
 model Product {
@@ -34,4 +33,10 @@ model ScanLog {
   query     String   // Nama barang yang teridentifikasi
   success   Boolean  @default(true)
   timestamp DateTime @default(now())
+}
+
+// Model untuk pengaturan sistem (Key-Value Store)
+model SystemSetting {
+  key   String @id @unique // e.g., 'GEMINI_API_KEY', 'GEMINI_MODEL'
+  value String
 }

@@ -2,7 +2,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { LayoutDashboard, PackagePlus, LogOut, Store } from 'lucide-react'
+import { LayoutDashboard, PackagePlus, LogOut, Store, Settings } from 'lucide-react'
 import { logoutAction } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 
@@ -39,6 +39,10 @@ export default async function DashboardLayout({
                     <Link href="/dashboard/products/add" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors text-slate-300 hover:text-white">
                         <PackagePlus className="w-5 h-5" />
                         <span className="font-medium">Tambah Barang</span>
+                    </Link>
+                    <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition-colors text-slate-300 hover:text-white">
+                        <Settings className="w-5 h-5" />
+                        <span className="font-medium">Pengaturan</span>
                     </Link>
                 </nav>
 
