@@ -36,10 +36,10 @@ export async function addProductAction(prevState: any, formData: FormData) {
     redirect('/dashboard/products')
 }
 
-export async function deleteProduct(id: string) {
+export async function deleteProduct(id: string | number) {
     try {
         await prisma.product.delete({
-            where: { id }
+            where: { id: Number(id) }
         })
         revalidatePath('/')
         revalidatePath('/dashboard/products')
@@ -50,10 +50,10 @@ export async function deleteProduct(id: string) {
     }
 }
 
-export async function updateProduct(id: string, data: any) {
+export async function updateProduct(id: string | number, data: any) {
     try {
         await prisma.product.update({
-            where: { id },
+            where: { id: Number(id) },
             data: {
                 nama: String(data.nama),
                 harga: parseFloat(String(data.harga)),
