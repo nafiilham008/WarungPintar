@@ -20,7 +20,10 @@ import {
     ChevronLeft,
     ChevronRight,
     Filter,
-    X
+    X,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown
 } from 'lucide-react'
 import { deleteProduct } from '@/actions/products'
 import { toast } from 'sonner'
@@ -59,6 +62,10 @@ export default function ProductsPage() {
         maxStock: ''
     })
 
+    // Sorting State
+    const [sortBy, setSortBy] = useState('createdAt')
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+
     const fetchProducts = useCallback(async () => {
         setLoading(true)
         try {
@@ -70,7 +77,9 @@ export default function ProductsPage() {
                 minPrice: filters.minPrice,
                 maxPrice: filters.maxPrice,
                 minStock: filters.minStock,
-                maxStock: filters.maxStock
+                maxStock: filters.maxStock,
+                sortBy,
+                sortOrder
             })
 
             const res = await fetch(`/api/products?${params.toString()}`)
@@ -86,7 +95,7 @@ export default function ProductsPage() {
         } finally {
             setLoading(false)
         }
-    }, [search, currentPage, filters])
+    }, [search, currentPage, filters, sortBy, sortOrder])
 
     useEffect(() => {
         getCategoriesAction().then(setCategories)
@@ -125,6 +134,20 @@ export default function ProductsPage() {
             maxStock: ''
         })
         setSearch('')
+    }
+
+    const handleSort = (column: string) => {
+        if (sortBy === column) {
+            setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortBy(column)
+            setSortOrder('asc')
+        }
+    }
+
+    const SortIcon = ({ column }: { column: string }) => {
+        if (sortBy !== column) return <ArrowUpDown className="ml-2 w-3 h-3 opacity-30" />
+        return sortOrder === 'asc' ? <ArrowUp className="ml-2 w-3 h-3 text-emerald-600" /> : <ArrowDown className="ml-2 w-3 h-3 text-emerald-600" />
     }
 
     return (
@@ -234,10 +257,42 @@ export default function ProductsPage() {
                     <Table>
                         <TableHeader className="bg-slate-50">
                             <TableRow>
-                                <TableHead className="w-[300px]">Barang</TableHead>
-                                <TableHead>Kategori</TableHead>
-                                <TableHead>Harga</TableHead>
-                                <TableHead>Stok</TableHead>
+                                <TableHead
+                                    className="w-[300px] cursor-pointer hover:text-emerald-600 transition-colors"
+                                    onClick={() => handleSort('nama')}
+                                >
+                                    <div className="flex items-center">
+                                        Barang
+                                        <SortIcon column="nama" />
+                                    </div>
+                                </TableHead>
+                                <TableHead
+                                    className="cursor-pointer hover:text-emerald-600 transition-colors"
+                                    onClick={() => handleSort('kategori')}
+                                >
+                                    <div className="flex items-center">
+                                        Kategori
+                                        <SortIcon column="kategori" />
+                                    </div>
+                                </TableHead>
+                                <TableHead
+                                    className="cursor-pointer hover:text-emerald-600 transition-colors"
+                                    onClick={() => handleSort('harga')}
+                                >
+                                    <div className="flex items-center">
+                                        Harga
+                                        <SortIcon column="harga" />
+                                    </div>
+                                </TableHead>
+                                <TableHead
+                                    className="cursor-pointer hover:text-emerald-600 transition-colors"
+                                    onClick={() => handleSort('stok')}
+                                >
+                                    <div className="flex items-center">
+                                        Stok
+                                        <SortIcon column="stok" />
+                                    </div>
+                                </TableHead>
                                 <TableHead className="text-right">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -327,7 +382,7 @@ export default function ProductsPage() {
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                             >
                                 <ChevronLeft className="w-4 h-4 mr-1" />
-                                Sebemulnya
+                                Sebelumnya
                             </Button>
 
                             <div className="flex items-center gap-1">

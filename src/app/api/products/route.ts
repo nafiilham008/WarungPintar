@@ -17,6 +17,8 @@ export async function GET(request: Request) {
     const maxPrice = searchParams.get('maxPrice')
     const minStock = searchParams.get('minStock')
     const maxStock = searchParams.get('maxStock')
+    const sortBy = searchParams.get('sortBy') || 'createdAt'
+    const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc'
 
     // Base query conditions
     let where: Prisma.ProductWhereInput = {}
@@ -53,7 +55,7 @@ export async function GET(request: Request) {
         const [products, total] = await Promise.all([
             prisma.product.findMany({
                 where,
-                orderBy: { createdAt: 'desc' },
+                orderBy: { [sortBy]: sortOrder },
                 skip,
                 take: limit,
             }),
@@ -73,7 +75,7 @@ export async function GET(request: Request) {
                 const [looseProducts, looseTotal] = await Promise.all([
                     prisma.product.findMany({
                         where: looseWhere,
-                        orderBy: { createdAt: 'desc' },
+                        orderBy: { [sortBy]: sortOrder },
                         skip,
                         take: limit,
                     }),
