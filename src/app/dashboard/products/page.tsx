@@ -61,7 +61,7 @@ export default function ProductsPage() {
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
     const [totalItems, setTotalItems] = useState(0)
-    const limit = 10
+    const [limit, setLimit] = useState(10)
 
     // Filter State
     const [showFilters, setShowFilters] = useState(false)
@@ -107,7 +107,7 @@ export default function ProductsPage() {
         } finally {
             setLoading(false)
         }
-    }, [search, currentPage, filters, sortBy, sortOrder])
+    }, [search, currentPage, filters, sortBy, sortOrder, limit])
 
     useEffect(() => {
         setMounted(true)
@@ -389,9 +389,32 @@ export default function ProductsPage() {
                 {/* Pagination Control */}
                 {!loading && totalItems > 0 && (
                     <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-4">
-                        <div className="text-sm text-slate-500">
-                            Menampilkan <span className="font-medium text-slate-700">{products.length}</span> dari <span className="font-medium text-slate-700">{totalItems}</span> barang.
+                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                            <span>
+                                Menampilkan <span className="font-medium text-slate-700">{products.length}</span> dari <span className="font-medium text-slate-700">{totalItems}</span> barang.
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <span>Baris per halaman:</span>
+                                <Select
+                                    value={limit.toString()}
+                                    onValueChange={(v) => {
+                                        setLimit(Number(v))
+                                        setCurrentPage(1) // Reset to page 1 when limit changes
+                                    }}
+                                >
+                                    <SelectTrigger className="h-8 w-[70px]">
+                                        <SelectValue placeholder={limit.toString()} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="5">5</SelectItem>
+                                        <SelectItem value="10">10</SelectItem>
+                                        <SelectItem value="25">25</SelectItem>
+                                        <SelectItem value="50">50</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
+
                         <div className="flex items-center gap-2">
                             <Button
                                 variant="outline"
