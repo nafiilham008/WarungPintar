@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Warung Ibu Pintar 🏪
 
-## Getting Started
+Aplikasi kasir pintar berbasis web dengan **AI Voice Assistant** yang bisa diajak ngobrol layaknya asisten pribadi.
 
-First, run the development server:
+> *"Mau cari apa? Biar Ibu yang carikan."*
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔥 Fitur Unggulan
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. 🎤 "Ibu Pintar" Voice Assistant
+Tak perlu ketik manual, cukup tekan tombol mikrofon dan bicara:
+- **Pencarian Cerdas:** "Cariin kopi Indocafe"
+- **Belanja Otomatis:** "Masukin 2 bungkus gula ke keranjang"
+- **Interaksi Natural:** "Halo Ibu", "Terima kasih"
+- **Auto Fallback:** Jika AI sibuk/error, sistem otomatis beralih ke mode manual tanpa henti.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. ⚙️ Admin Settings Center
+Konfigurasi otak AI langsung dari dashboard:
+- **API Key Management:** Ganti Gemini API Key tanpa coding.
+- **Model Switching:** Pilih otak yang pas (`Gemini 2.0 Flash` untuk kecepatan atau `1.5 Flash` untuk efisiensi).
 
-## Learn More
+### 3. 📦 Manajemen Stok & Kasir
+- Dashboard admin responsif.
+- Manajemen produk (CRUD).
+- Sistem kasir realtime.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Teknologi yang Digunakan
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Frontend:** Next.js 16 (App Router), Tailwind CSS v4, Shadcn UI.
+- **Backend:** Next.js Server Actions & API Routes.
+- **Database:** PostgreSQL (via Prisma ORM).
+- **AI Core:** Google Gemini AI (Generative Language API).
+- **Voice:** Web Speech API (Browser Native).
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Cara Menjalankan
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/username/warung-ibu-pintar.git
+   cd warung-ibu-pintar
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Setup Environment**
+   Buat file `.env` dan isi database URL Anda:
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/warung_ibu_pintar"
+   # Optional (bisa diatur di dashboard nanti)
+   GEMINI_API_KEY="AIzaSy..."
+   ```
+
+4. **Siapkan Database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+5. **Jalankan Aplikasi**
+   ```bash
+   npm run dev
+   ```
+
+Buka [http://localhost:3000](http://localhost:3000) di browser.
+
+---
+
+## 👨‍💻 Credits
+
+Created with ❤️ and ☕ by **Nafi Ilham**.
+
+© 2026 Warung Ibu Pintar Project.
