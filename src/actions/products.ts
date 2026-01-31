@@ -1,55 +1,41 @@
+'use client' // Note: This file should be 'use server' if strictly server actions, but usually imported in client. Let's make it 'use server'.
 'use server'
 
-import { z } from 'zod'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
 
-const prisma = new PrismaClient()
-
-const productSchema = z.object({
-    nama: z.string().min(3, "Nama barang terlalu pendek"),
-    harga: z.coerce.number().min(100, "Harga tidak valid"),
-    kategori: z.string().optional(),
-    lokasi: z.string().min(1, "Lokasi wajib diisi"),
-    satuan: z.string().default("pcs"),
-})
-
-export async function addProductAction(prevState: any, formData: FormData) {
-    // 1. Auth Check
-    const session = (await cookies()).get('admin_session')
-    if (!session) {
-        return { error: "Akses ditolak. Silakan login kembali." }
-    }
-
-    // 2. Validation
-    const data = Object.fromEntries(formData.entries())
-    const parsed = productSchema.safeParse(data)
-
-    if (!parsed.success) {
-        return { error: parsed.error.issues[0].message }
-    }
-
-    const { nama, harga, kategori, lokasi, satuan } = parsed.data
-
+export async function deleteProduct(id: string) {
     try {
-        await prisma.product.create({
+        await prisma.product.delete({
+            where: { id }
+        })
+        revalidatePath('/dashboard/products')
+        revalidatePath('/')
+        return { success: true }
+    } catch (error) {
+        console.error('Delete error:', error)
+        return { success: false, error: 'Gagal menghapus barang' }
+    }
+}
+
+export async function updateProduct(id: string, data: any) {
+    try {
+        await prisma.product.update({
+            where: { id },
             data: {
-                nama,
-                harga,
-                kategori,
-                lokasi,
-                satuan
+                nama: data.nama,
+                harga: parseFloat(data.harga),
+                stok: parseInt(data.stok),
+                kategori: data.kategori,
+                satuan: data.satuan,
+                gambar: data.gambar
             }
         })
-
-        revalidatePath('/dashboard')
-        revalidatePath('/') // Update public list too
-    } catch (e) {
-        console.error("Add Product Error:", e)
-        return { error: "Gagal menyimpan barang ke database." }
+        revalidatePath('/dashboard/products')
+        revalidatePath('/')
+        return { success: true }
+    } catch (error) {
+        console.error('Update error:', error)
+        return { success: false, error: 'Gagal memperbarui barang' }
     }
-
-    redirect('/dashboard')
 }

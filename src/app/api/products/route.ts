@@ -8,7 +8,11 @@ export async function GET(request: Request) {
     const q = searchParams.get('q')
 
     if (!q) {
-        return NextResponse.json([])
+        const allProducts = await prisma.product.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 100
+        })
+        return NextResponse.json(allProducts)
     }
 
     // 1. Search Utama (Prioritas 1: Exact/Phrase Match)

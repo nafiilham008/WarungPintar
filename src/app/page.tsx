@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter, SheetClose } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
-import { Search, Tag, ShoppingBag, Clock, Lightbulb, Pill, Home, ArrowLeft, Plus, Minus, Trash2, Calculator, ChevronRight, RefreshCcw, CheckCircle2, Copy, Camera, Coffee } from 'lucide-react'
+import { Search, Tag, ShoppingBag, Clock, Lightbulb, Pill, Home, ArrowLeft, Plus, Minus, Trash2, Calculator, ChevronRight, RefreshCcw, CheckCircle2, Copy, Camera, Coffee, LayoutDashboard } from 'lucide-react'
 import { toast } from "sonner"
 import { ProductCard, Product } from "@/components/features/ProductCard"
 import { CartSheet, CartItem } from "@/components/features/CartSheet"
@@ -229,7 +230,13 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="text-right">
+          <div className="flex items-center gap-2">
+            {!query && (
+              <Link href="/dashboard" className="flex items-center gap-2 text-emerald-600 bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 px-3 py-1.5 rounded-full transition-colors mr-1">
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span className="text-xs font-bold">Admin</span>
+              </Link>
+            )}
             <div className="flex items-center gap-2 text-slate-700 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-sm font-mono font-medium">
