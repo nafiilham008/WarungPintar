@@ -20,10 +20,10 @@ export async function addProductAction(prevState: any, formData: FormData) {
             data: {
                 nama,
                 harga,
-                satuan,
-                kategori,
-                lokasi,
-                stok: 0, // Default stok 0 untuk barang baru
+                satuan: satuan || null,
+                kategori: kategori || null,
+                lokasi: lokasi || '',
+                stok: 0,
             }
         })
     } catch (error) {
@@ -52,17 +52,25 @@ export async function deleteProduct(id: string | number) {
 
 export async function updateProduct(id: string | number, data: any) {
     try {
+        const updateData: any = {
+            nama: String(data.nama),
+            harga: Number(data.harga),
+            stok: Number(data.stok),
+            lokasi: String(data.lokasi),
+        }
+
+        if (data.kategori) updateData.kategori = String(data.kategori);
+        else updateData.kategori = null;
+
+        if (data.satuan) updateData.satuan = String(data.satuan);
+        else updateData.satuan = null;
+
+        if (data.gambar) updateData.gambar = String(data.gambar);
+        else updateData.gambar = null;
+
         await prisma.product.update({
             where: { id: Number(id) },
-            data: {
-                nama: String(data.nama),
-                harga: Number(data.harga),
-                stok: Number(data.stok),
-                kategori: data.kategori ? String(data.kategori) : null,
-                satuan: data.satuan ? String(data.satuan) : null,
-                lokasi: String(data.lokasi),
-                gambar: data.gambar ? String(data.gambar) : null,
-            }
+            data: updateData
         })
         revalidatePath('/')
         revalidatePath('/dashboard/products')

@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Package, Smartphone } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 
 export default async function DashboardPage() {
