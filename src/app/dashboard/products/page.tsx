@@ -55,6 +55,7 @@ export default function ProductsPage() {
     const [search, setSearch] = useState('')
     const [deletingId, setDeletingId] = useState<string | number | null>(null)
     const [productToDelete, setProductToDelete] = useState<{ id: string | number, name: string } | null>(null)
+    const [mounted, setMounted] = useState(false)
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1)
@@ -109,13 +110,15 @@ export default function ProductsPage() {
     }, [search, currentPage, filters, sortBy, sortOrder])
 
     useEffect(() => {
+        setMounted(true)
         getCategoriesAction().then(setCategories)
     }, [])
 
     useEffect(() => {
+        if (!mounted) return
         const timer = setTimeout(fetchProducts, 400)
         return () => clearTimeout(timer)
-    }, [fetchProducts])
+    }, [fetchProducts, mounted])
 
     // Reset to page 1 when search or filter changes
     useEffect(() => {
@@ -426,25 +429,27 @@ export default function ProductsPage() {
                 )}
             </div>
 
-            <AlertDialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Hapus Barang?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Apakah Anda yakin ingin menghapus <strong>&quot;{productToDelete?.name}&quot;</strong>? Tindakan ini tidak dapat dibatalkan.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                            Hapus
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            {mounted && (
+                <AlertDialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
+                    <AlertDialogContent className="max-w-[90vw] sm:max-w-lg rounded-2xl">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Hapus Barang?</AlertDialogTitle>
+                            <AlertDialogDescription className="text-slate-500">
+                                Apakah Anda yakin ingin menghapus <strong>&quot;{productToDelete?.name}&quot;</strong>? Tindakan ini tidak dapat dibatalkan.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2 mt-4">
+                            <AlertDialogCancel className="rounded-xl border-slate-200">Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleDelete}
+                                className="bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg shadow-red-100"
+                            >
+                                Hapus Sekarang
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
         </div>
     )
 }

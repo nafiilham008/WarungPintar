@@ -83,7 +83,7 @@ export default function HomePage() {
       try {
         const res = await fetch(`/api/products?q=${encodeURIComponent(debouncedQuery)}`)
         const data = await res.json()
-        setResults(data)
+        setResults(data.products || [])
       } catch (err) {
         console.error("Gagal search", err)
       } finally {
@@ -160,10 +160,11 @@ export default function HomePage() {
       try {
         const res = await fetch(`/api/products?q=${encodeURIComponent(productName)}`)
         const data = await res.json()
+        const foundProducts = data.products || []
 
-        if (data && data.length > 0) {
+        if (foundProducts.length > 0) {
           // Ambil hasil pertama yang paling relevan
-          const product = data[0]
+          const product = foundProducts[0]
 
           // Tambahkan ke keranjang
           setCart(prev => {
