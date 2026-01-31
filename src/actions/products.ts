@@ -65,8 +65,6 @@ export async function updateProduct(id: string | number, data: any) {
         if (data.satuan) updateData.satuan = String(data.satuan);
         else updateData.satuan = null;
 
-        if (data.gambar) updateData.gambar = String(data.gambar);
-        else updateData.gambar = null;
 
         await prisma.product.update({
             where: { id: Number(id) },
