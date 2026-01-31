@@ -58,8 +58,8 @@ export async function updateProduct(id: string | number, data: any) {
                 nama: String(data.nama),
                 harga: parseFloat(String(data.harga)),
                 stok: parseInt(String(data.stok)),
-                kategori: String(data.kategori),
-                satuan: String(data.satuan),
+                kategori: data.kategori ? String(data.kategori) : null,
+                satuan: data.satuan ? String(data.satuan) : null,
                 lokasi: String(data.lokasi),
                 gambar: data.gambar ? String(data.gambar) : null
             }
