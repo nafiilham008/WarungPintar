@@ -81,7 +81,7 @@ File `.env` berisi variabel rahasia. Jangan di-commit sembarangan jika repo bers
 DATABASE_URL="postgresql://postgres:password@localhost:5432/warung_db"
 
 # Google Gemini API Key
-GEMINI_API_KEY="AIzaSy..."
+GEMINI_API_KEY="MASUKKAN_API_KEY_DISINI"
 
 # Base URL (Untuk API call internal)
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
