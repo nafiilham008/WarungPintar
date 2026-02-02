@@ -4,9 +4,8 @@ import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/ge
 
 const prisma = new PrismaClient()
 
-// Initialize Gemini
-// Pastikan GEMINI_API_KEY ada di .env
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
+// Hapus inisialisasi genAI di global scope supaya bisa dinamis
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 export async function POST(request: Request) {
     try {
@@ -16,11 +15,21 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'No image provided' }, { status: 400 })
         }
 
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json({ error: 'API Key Gemini belum disetting di .env' }, { status: 500 })
+        // 1. Ambil API Key dari Database (Prioritas) atau Environment
+        const keySetting = await prisma.systemSetting.findUnique({
+            where: { key: 'GEMINI_API_KEY' }
+        })
+
+        const apiKey = keySetting?.value || process.env.GEMINI_API_KEY
+
+        if (!apiKey) {
+            return NextResponse.json({ error: 'API Key Gemini belum disetting di Dashboard > Pengaturan' }, { status: 500 })
         }
 
-        // 1. Identifikasi Gambar: Gunakan Gemini 2.5 Flash Lite (Versi Stabil 2026)
+        // Initialize Gemini per request dengan key yang dinamis
+        const genAI = new GoogleGenerativeAI(apiKey)
+
+        // 2. Identifikasi Gambar: Gunakan Gemini 2.5 Flash Lite (Versi Stabil 2026)
         // Note: Versi 1.5 (404) dan 2.0 (Limit 0) bermasalah. Kita pakai 2.5 Lite.
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash-lite",
